@@ -3,33 +3,31 @@ const multer = require('multer');
 const path = require('path');
 const app = express();
 
-// Set up multer for file storage
+// Set up the storage engine
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/'); // Uploads folder on server
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
-    }
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
 });
-const upload = multer({ storage });
 
-// Upload route
+const upload = multer({ storage: storage });
+
+// Route to handle file uploads
 app.post('/upload', upload.single('file'), (req, res) => {
-    const file = req.file;
-    const customSlug = req.body.customSlug;
-
-    if (!file) {
-        return res.status(400).json({ success: false, message: 'No file uploaded' });
-    }
-
-    const fileUrl = `https://gofile-w67u.onrender.com/uploads/${customSlug || file.filename}`;
-    res.json({ success: true, url: fileUrl });
+  res.send(`File uploaded at: /uploads/${req.file.filename}`);
 });
 
-// Serve uploaded files
-app.use('/uploads', express.static('uploads'));
+// Handle root path `/`
+app.get('/', (req, res) => {
+  res.send('Welcome to the file upload service!');
+});
 
-app.listen(3000, () => {
-    console.log('Server running on port 3000');
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
