@@ -23,7 +23,7 @@ app.post('/upload', upload.single('file'), (req, res) => {
         return res.status(400).json({ success: false, message: 'No file uploaded' });
     }
 
-    const fileUrl = `https://your-backend-service-url.onrender.com/uploads/${customSlug || file.filename}`;
+    const fileUrl = `https://gofile-w67u.onrender.com/uploads/${customSlug || file.filename}`;
     res.json({ success: true, url: fileUrl });
 });
 
